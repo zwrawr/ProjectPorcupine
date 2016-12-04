@@ -51,7 +51,8 @@ public static class Settings
         LoadSettings();
     }
 
-    public static string GetSettingWithOverwrite(string key, string defaultValue)
+    public static T GetSettingWithOverwrite<T>(string key, T defaultValue)
+         where T : IConvertible
     {
         if (settingsDict == null)
         {
@@ -59,18 +60,30 @@ public static class Settings
             return defaultValue;
         }
 
-        string setting = GetSetting(key, defaultValue);
-        if (setting != null)
+        string value;
+        if (settingsDict.TryGetValue(key, out value))
         {
-            return setting;
+            try
+            {
+                T converted = (T)Convert.ChangeType(value, typeof(T));
+                return converted;
+            }
+            catch (Exception exception)
+            {
+                Debug.ULogErrorChannel("Settings", "Exception {0} whyle trying to convert {1} to type {2}", exception.Message, value, typeof(T));
+                return defaultValue;
+            }
         }
 
-        settingsDict.Add(key, defaultValue);
+        Debug.ULogWarningChannel("Settings", "Attempted to access a setting that was not loaded from Settings.json:\t" + key + " Adding it to Dict and File");
+
+        settingsDict.Add(key, (string)Convert.ChangeType(defaultValue,typeof(string)));
 
         SaveSettings();
 
         return defaultValue;
     }
+
 
     public static void SetSetting(string key, object obj)
     {

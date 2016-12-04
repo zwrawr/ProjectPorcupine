@@ -130,7 +130,7 @@ public class MouseController
         UpdateCameraMovement();
         UpdateSelection();
 
-        if (Settings.GetSetting("DialogBoxSettingsDevConsole_developerModeToggle", false))
+        if (Settings.GetSettingWithOverwrite("DialogBoxSettingsDevConsole_developerModeToggle", false))
         {
             UpdateSpawnClicking();
         }
